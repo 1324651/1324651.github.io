@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book Information</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        h1 {
+            color: #333;
+            border-bottom: 2px solid #4CAF50;
+            padding-bottom: 10px;
+            text-align: center;
+        }
+        .book-container {
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 20px;
+            background-color: #f9f9f9;
+            margin: 15px 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .book-container h2 {
+            margin-top: 0;
+            color: #2c3e50;
+        }
+        .book-info {
+            margin: 8px 0;
+            font-size: 1.05em;
+        }
+        .error {
+            color: #dc3545;
+            padding: 15px;
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            border-radius: 5px;
+            text-align: center;
+        }
+        .book-count {
+            text-align: center;
+            margin: 10px 0 20px;
+            font-style: italic;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <h1>Book Collection</h1>
+    <div class="book-count" id="bookCount"></div>
+    <div id="bookInfo"></div>
+    <script>
+        var xhr = new XMLHttpRequest();
+        xhr.responseType = 'document';
+        xhr.open('GET', 'book.xml');
+        xhr.onload = function() {
+            var bookInfo = document.getElementById('bookInfo');
+            var bookCount = document.getElementById('bookCount');
+            
+            if (xhr.status === 200) {
+                var xmlDoc = xhr.responseXML;
+                var books = xmlDoc.querySelectorAll('book'); 
+                if (books.length > 0) {
+                    bookCount.textContent = `Found ${books.length} books in the collection`;
+                    var booksHTML = '';
+                    books.forEach(book => {
+                        var id = book.getAttribute('id');
+                        var title = book.querySelector('title').textContent;
+                        var author = book.querySelector('author').textContent;
+                        var price = book.querySelector('price').textContent;
+                        
+                        booksHTML += `
+                            <div class="book-container">
+                                <h2>${title}</h2>
+                                <p class="book-info"><strong>ID:</strong> ${id}</p>
+                                <p class="book-info"><strong>Author:</strong> ${author}</p>
+                                <p class="book-info"><strong>Price:</strong> $${price}</p>
+                            </div>
+                        `;
+                    });
+                    
+                    bookInfo.innerHTML = booksHTML;
+                } else {
+                    bookInfo.innerHTML = '<div class="error">No books found in XML</div>';
+                }
+            } else {
+                bookInfo.innerHTML = `<div class="error">Error loading XML. Status: ${xhr.status}</div>`;
+            }
+        };
+        xhr.onerror = function() {
+            document.getElementById('bookInfo').innerHTML = 
+                '<div class="error">Network error occurred while loading XML</div>';
+        };
+        xhr.send();
+    </script>
+</body>
+</html>
